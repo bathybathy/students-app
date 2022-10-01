@@ -1,0 +1,2 @@
+export const BUSCAR_CEP = 'BUSCAR_CEP';
+export const BUSCAR_CEP_SUCCESS = 'BUSCAR_CEP_SUCCESS';
