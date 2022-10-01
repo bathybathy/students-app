@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:3000/',
+  baseURL: 'https://back-app-2222.herokuapp.com/',
 });
 
 export const buscaCep = axios.create({

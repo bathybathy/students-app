@@ -19,7 +19,7 @@ import DocumentPicker, {
   isInProgress,
   types,
 } from 'react-native-document-picker';
-import {yupResolver} from '@hookform/resolvers';
+import {yupResolver} from '@hookform/resolvers/yup';
 
 interface IForm {
   nome: string;
@@ -55,22 +55,42 @@ const Form = () => {
     handleSubmit,
     setValue,
     formState: {errors},
-  } = useForm<IForm>({
-    resolver: yupResolver(schema),
-  });
+    reset,
+  } = useForm<IForm>({});
 
-  const onSubmit: SubmitHandler<IForm> = async data => {
+  const onSubmit: SubmitHandler<IForm> = async (data: IForm) => {
+    console.log(data);
+    const dataAsFormData = new FormData();
+
+    dataAsFormData.append('nome', data.nome);
+    dataAsFormData.append('rua', data.rua);
+    dataAsFormData.append('numero', data.numero);
+    dataAsFormData.append('bairro', data.bairro);
+    dataAsFormData.append('cidade', data.cidade);
+    dataAsFormData.append('estado', data.estado);
+    dataAsFormData.append('file', data.file);
+    if (data.complemento) {
+      dataAsFormData.append('complemento', data.complemento);
+    }
     try {
-      await api.post('', data);
+      const oi = await api.post('/criar', dataAsFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      reset();
+      console.log(oi, 'oi');
     } catch (error) {}
   };
 
-  const handleCepChange = async cep => {
+  const handleCepChange = async (cep, onChange) => {
     //console.log(cep.split('').length);
+    //onChange?.();
     if (cep.split('').length === 8) {
       try {
         const {data} = await buscaCep.get(`${cep}/json`);
         if (data) {
+          setValue('cep', cep);
           setValue('rua', data.logradouro);
           setValue('bairro', data.bairro);
           setValue('cidade', data.localidade);
@@ -88,78 +108,136 @@ const Form = () => {
       <Controller
         name="nome"
         control={control}
-        render={({field}) => <TextInput {...field} maxLength={40} />}
+        render={({field: {onChange, value, onBlur}}) => (
+          <TextInput
+            style={styles.input}
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            maxLength={40}
+          />
+        )}
       />
+      <Text style={styles.errors}>{errors.nome?.message}</Text>
 
       <Controller
         name="cep"
         control={control}
         render={({field: {onChange, onBlur, value}}) => (
           <MaskedTextInput
+            style={styles.input}
             mask="99999-999"
             value={value}
-            onChangeText={(text, rawText) => handleCepChange(rawText)}
+            onChangeText={(text, rawText) => handleCepChange(rawText, onChange)}
             maxLength={9}
             placeholder="CEP"
+            onBlur={onBlur}
           />
         )}
       />
+      <Text style={styles.errors}>{errors.cep?.message}</Text>
 
       <Controller
         name="rua"
         control={control}
-        render={({field}) => (
-          <TextInput placeholder="Rua" {...field} maxLength={40} />
+        render={({field: {onChange, onBlur, value}}) => (
+          <TextInput
+            style={styles.input}
+            placeholder="Rua"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            maxLength={40}
+          />
         )}
       />
+      <Text style={styles.errors}>{errors.rua?.message}</Text>
 
       <Controller
         name="numero"
         control={control}
-        render={({field}) => (
-          <TextInput placeholder="Numero" {...field} maxLength={40} />
+        render={({field: {onChange, onBlur, value}}) => (
+          <TextInput
+            style={styles.input}
+            placeholder="Numero"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            maxLength={40}
+          />
         )}
       />
+      <Text style={styles.errors}>{errors.numero?.message}</Text>
 
       <Controller
         name="complemento"
         control={control}
-        render={({field}) => (
-          <TextInput placeholder="Complemento" {...field} maxLength={40} />
+        render={({field: {onChange, onBlur, value}}) => (
+          <TextInput
+            style={styles.input}
+            placeholder="Complemento"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            maxLength={40}
+          />
         )}
       />
 
       <Controller
         name="bairro"
         control={control}
-        render={({field}) => (
-          <TextInput placeholder="Bairro" {...field} maxLength={40} />
+        render={({field: {onChange, onBlur, value}}) => (
+          <TextInput
+            style={styles.input}
+            placeholder="Bairro"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            maxLength={40}
+          />
         )}
       />
+      <Text style={styles.errors}>{errors.bairro?.message}</Text>
 
       <Controller
         name="cidade"
         control={control}
-        render={({field}) => (
-          <TextInput placeholder="Cidade" {...field} maxLength={40} />
+        render={({field: {onChange, onBlur, value}}) => (
+          <TextInput
+            style={styles.input}
+            placeholder="Cidade"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            maxLength={40}
+          />
         )}
       />
+      <Text style={styles.errors}>{errors.cidade?.message}</Text>
 
       <Controller
         name="estado"
         control={control}
-        render={({field}) => (
-          <TextInput placeholder="Estado" {...field} maxLength={40} />
+        render={({field: {onChange, onBlur, value}}) => (
+          <TextInput
+            style={styles.input}
+            placeholder="Estado"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            maxLength={40}
+          />
         )}
       />
+      <Text style={styles.errors}>{errors.estado?.message}</Text>
 
       <Controller
-        name="estado"
+        name="file"
         control={control}
-        render={({field}) => (
+        render={({field: {onChange, value}}) => (
           <Button
             title="Upload"
-            {...field}
             onPress={async () => {
               await PermissionsAndroid.request(
                 'android.permission.READ_EXTERNAL_STORAGE',
@@ -172,12 +250,17 @@ const Form = () => {
                   type: ['image/jpg', 'image/jpeg'],
                 });
                 console.log(pickerResult);
+                onChange?.();
+                setValue('file', pickerResult);
                 setResult([pickerResult]);
               } catch (e) {}
             }}
           />
         )}
       />
+      <Text style={styles.errors}>{errors.file?.message}</Text>
+
+      <Button onPress={handleSubmit(onSubmit)} title="Enviar" />
     </View>
   );
 };
@@ -187,5 +270,13 @@ export default Form;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginHorizontal: 16,
+    marginVertical: 32,
   },
+  errors: {
+    fontSize: 11,
+    color: 'red',
+    marginBottom: 16,
+  },
+  input: {borderBottomWidth: 1},
 });

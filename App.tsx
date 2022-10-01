@@ -1,13 +1,14 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 import {
   NavigationContainer,
   createNavigationContainerRef,
 } from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as SCREEN from './src/screens';
-import {Provider} from 'react-redux';
-import {store} from './src/store';
+import { Provider } from 'react-redux';
+import { store } from './src/store';
+import { theme } from './src/theme';
 
 export const navigationRef = createNavigationContainerRef<screenStack>();
 const Stack = createNativeStackNavigator();
@@ -22,21 +23,24 @@ const App = () => {
   return (
     <Provider store={store}>
       <NavigationContainer ref={navigationRef}>
-        <Stack.Navigator>
+        <Stack.Navigator
+          screenOptions={{
+            contentStyle: { backgroundColor: theme.background },
+          }}>
           <Stack.Screen
             name="Home"
             component={SCREEN.Home}
-            options={{headerShown: false}}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="List"
             component={SCREEN.List}
-            options={{headerShown: false}}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="Form"
             component={SCREEN.Form}
-            options={{headerShown: false}}
+            options={{ headerShown: false }}
           />
         </Stack.Navigator>
       </NavigationContainer>

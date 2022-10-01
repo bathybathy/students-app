@@ -9,6 +9,9 @@ const Home = () => {
       <Pressable onPress={() => navigationRef.navigate('Form')}>
         <Text>Formulário</Text>
       </Pressable>
+      <Pressable onPress={() => navigationRef.navigate('List')}>
+        <Text>Lista</Text>
+      </Pressable>
     </View>
   );
 };
