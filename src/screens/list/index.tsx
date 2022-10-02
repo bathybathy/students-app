@@ -5,14 +5,15 @@ import {
   FlatList,
   Image,
   StyleSheet,
-  Button,
   Pressable,
   Alert,
 } from 'react-native';
 import { navigationRef } from '../../../App';
 import { api } from '../../api';
 import Title from '../../components/Title';
+import Button from '../../components/Button';
 import { theme } from '../../theme';
+import Animated, { SlideInLeft } from 'react-native-reanimated';
 
 interface IItem {
   nome: string;
@@ -55,7 +56,7 @@ const List = () => {
 
     //prettier-ignore
     return (
-      <View style={styles.card}>
+      <Animated.View entering={SlideInLeft} style={styles.card}>
         {item.url ? (<Image style={{width: 50, height: 50, borderRadius: 25, padding: 8}} source={{uri: `${item.url}`}} /> ): (<React.Fragment />)}
         <View style={{flexDirection: 'column'}}>
         
@@ -82,25 +83,15 @@ const List = () => {
         </View>
         </View>
 
-        
-          <View style={styles.column}>
-        
+        <View style={styles.column}>
         <View style={styles.row}>
-        <Pressable onPress={()=>handleEdit(item)} style={{backgroundColor: theme.highlight, paddingVertical: 8, borderRadius: 8, paddingHorizontal: 16, flexDirection: 'column', width: 100, alignItems: 'center'}}>
-          <Text style={{color: theme.black}}>
-          Editar
-          </Text>
-        </Pressable>
+        <Button onPress={()=>handleEdit(item)} text='Editar' fill='filled' containerStyle={{width: 100,}} />
         </View>
         <View style={styles.row}>
-        <Pressable onPress={()=>handleDelete(item)} style={{backgroundColor: theme.highlight, paddingVertical: 8, borderRadius: 8, paddingHorizontal: 16, flexDirection: 'column', width: 100, alignItems: 'center', marginVertical: 4}}>
-          <Text style={{color: theme.black}}>
-          Deletar
-          </Text>
-        </Pressable>
+        <Button onPress={()=>handleDelete(item)} text='Deletar' fill='outline' containerStyle={{marginVertical: 4, width: 100,}} />
         </View>
         </View>
-      </View>
+      </Animated.View>
     );
   };
   return (
@@ -111,6 +102,7 @@ const List = () => {
         renderItem={renderItem}
         ListEmptyComponent={<React.Fragment />}
         extraData={list}
+        refreshing={!list.length}
       />
     </View>
   );

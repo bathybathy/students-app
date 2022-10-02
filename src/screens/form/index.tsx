@@ -3,15 +3,13 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import {
   StyleSheet,
   Text,
-  View,
+  ScrollView,
   TextInput,
-  Button,
   PermissionsAndroid,
   Pressable,
 } from 'react-native';
 import { MaskedTextInput } from 'react-native-mask-text';
 import { api, buscaCep } from '../../api';
-import * as CONSTANTS from '../../constants';
 import * as yup from 'yup';
 import DocumentPicker, {
   DirectoryPickerResponse,
@@ -24,6 +22,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { screenStack } from '../../../App';
 import { theme } from '../../theme';
 import Title from '../../components/Title';
+import Button from '../../components/Button';
 
 export interface IForm {
   nome: string;
@@ -120,7 +119,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
     } catch (error) {}
   };
 
-  const handleCepChange = async (cep, onChange) => {
+  const handleCepChange = async cep => {
     //console.log(cep.split('').length);
     //onChange?.();
     if (cep.split('').length === 8) {
@@ -139,7 +138,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
     }
   };
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Title title="Cadastrar Aluno" />
 
       <Controller
@@ -167,7 +166,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             style={styles.input}
             mask="99999-999"
             value={value}
-            onChangeText={(text, rawText) => handleCepChange(rawText, onChange)}
+            onChangeText={(text, rawText) => handleCepChange(rawText)}
             maxLength={9}
             placeholder="CEP"
             placeholderTextColor={theme.highlight}
@@ -226,6 +225,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
           />
         )}
       />
+      <Text style={styles.errors}>{errors.complemento?.message}</Text>
 
       <Controller
         name="bairro"
@@ -282,13 +282,9 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
         name="file"
         control={control}
         render={({ field: { onChange, value } }) => (
-          <Pressable
-            style={{
-              paddingVertical: 16,
-              backgroundColor: theme.highlight,
-              alignItems: 'center',
-              borderRadius: 8,
-            }}
+          <Button
+            fill="outline"
+            text={!result?.length ? 'Adicionar foto' : 'Foto Adicionada'}
             onPress={async () => {
               await PermissionsAndroid.request(
                 'android.permission.READ_EXTERNAL_STORAGE',
@@ -305,17 +301,14 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
                 setValue('file', pickerResult);
                 setResult([pickerResult]);
               } catch (e) {}
-            }}>
-            <Text style={{ color: theme.black }}>
-              {!result?.length ? 'Adicionar foto' : 'Foto Adicionada'}
-            </Text>
-          </Pressable>
+            }}
+          />
         )}
       />
       <Text style={styles.errors}>{errors.file?.message}</Text>
 
-      <Button onPress={handleSubmit(onSubmit)} title="Enviar" />
-    </View>
+      <Button onPress={handleSubmit(onSubmit)} fill="filled" text="Enviar" />
+    </ScrollView>
   );
 };
 
