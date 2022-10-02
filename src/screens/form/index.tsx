@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import {
   StyleSheet,
@@ -48,9 +48,8 @@ const schema = yup.object().shape({
 });
 
 const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
-  const [result, setResult] = React.useState<Array<DocumentPickerResponse>>();
-
-  console.log(route?.params, 'rota');
+  const [result, setResult] = useState<Array<DocumentPickerResponse>>();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const initialValues = () => {
     if (route?.params) {
@@ -81,6 +80,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
 
   const onSubmit: SubmitHandler<IForm> = async (data: IForm) => {
     console.log(data);
+    setLoading(true);
     const dataAsFormData = new FormData();
 
     dataAsFormData.append('nome', data.nome);
@@ -116,7 +116,10 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
         reset();
         console.log(oi, 'oi');
       }
-    } catch (error) {}
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCepChange = async cep => {
@@ -307,7 +310,12 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
       />
       <Text style={styles.errors}>{errors.file?.message}</Text>
 
-      <Button onPress={handleSubmit(onSubmit)} fill="filled" text="Enviar" />
+      <Button
+        onPress={handleSubmit(onSubmit)}
+        fill="filled"
+        text="Enviar"
+        disabled={loading}
+      />
     </ScrollView>
   );
 };
