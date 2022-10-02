@@ -1,5 +1,5 @@
-import React, {useReducer} from 'react';
-import {useForm, Controller, SubmitHandler} from 'react-hook-form';
+import React, { useEffect, useReducer } from 'react';
+import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import {
   StyleSheet,
   Text,
@@ -7,21 +7,25 @@ import {
   TextInput,
   Button,
   PermissionsAndroid,
+  Pressable,
 } from 'react-native';
-import {MaskedTextInput} from 'react-native-mask-text';
-import {api, buscaCep} from '../../api';
+import { MaskedTextInput } from 'react-native-mask-text';
+import { api, buscaCep } from '../../api';
 import * as CONSTANTS from '../../constants';
 import * as yup from 'yup';
-import {useDispatch} from 'react-redux';
 import DocumentPicker, {
   DirectoryPickerResponse,
   DocumentPickerResponse,
   isInProgress,
   types,
 } from 'react-native-document-picker';
-import {yupResolver} from '@hookform/resolvers/yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { screenStack } from '../../../App';
+import { theme } from '../../theme';
+import Title from '../../components/Title';
 
-interface IForm {
+export interface IForm {
   nome: string;
   rua: string;
   cep: string;
@@ -44,19 +48,37 @@ const schema = yup.object().shape({
   file: yup.mixed().required('Campo obrigatório'),
 });
 
-const Form = () => {
-  const [result, setResult] = React.useState<
-    Array<DocumentPickerResponse> | DirectoryPickerResponse | undefined | null
-  >();
-  const dispatch = useDispatch();
+const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
+  const [result, setResult] = React.useState<Array<DocumentPickerResponse>>();
+
+  console.log(route?.params, 'rota');
+
+  const initialValues = () => {
+    if (route?.params) {
+      return route.params;
+    }
+    return {
+      nome: '',
+      rua: '',
+      cep: '',
+      bairro: '',
+      numero: '',
+      complemento: '',
+      cidade: '',
+      estado: '',
+      file: '',
+    };
+  };
 
   const {
     control,
     handleSubmit,
     setValue,
-    formState: {errors},
+    formState: { errors },
     reset,
-  } = useForm<IForm>({});
+  } = useForm<IForm>({
+    defaultValues: initialValues(),
+  });
 
   const onSubmit: SubmitHandler<IForm> = async (data: IForm) => {
     console.log(data);
@@ -68,18 +90,33 @@ const Form = () => {
     dataAsFormData.append('bairro', data.bairro);
     dataAsFormData.append('cidade', data.cidade);
     dataAsFormData.append('estado', data.estado);
-    dataAsFormData.append('file', data.file);
+    dataAsFormData.append('cep', data.cep);
+    if (data.file) {
+      dataAsFormData.append('file', data.file);
+    }
     if (data.complemento) {
       dataAsFormData.append('complemento', data.complemento);
     }
     try {
-      const oi = await api.post('/criar', dataAsFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      reset();
-      console.log(oi, 'oi');
+      if (route.params) {
+        const oi = await api.patch(
+          `/update/${route.params._id}`,
+          dataAsFormData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        );
+      } else {
+        const oi = await api.post('/criar', dataAsFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        reset();
+        console.log(oi, 'oi');
+      }
     } catch (error) {}
   };
 
@@ -88,7 +125,7 @@ const Form = () => {
     //onChange?.();
     if (cep.split('').length === 8) {
       try {
-        const {data} = await buscaCep.get(`${cep}/json`);
+        const { data } = await buscaCep.get(`${cep}/json`);
         if (data) {
           setValue('cep', cep);
           setValue('rua', data.logradouro);
@@ -103,18 +140,20 @@ const Form = () => {
   };
   return (
     <View style={styles.container}>
-      <Text>form</Text>
+      <Title title="Cadastrar Aluno" />
 
       <Controller
         name="nome"
         control={control}
-        render={({field: {onChange, value, onBlur}}) => (
+        render={({ field: { onChange, value, onBlur } }) => (
           <TextInput
             style={styles.input}
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
             maxLength={40}
+            placeholderTextColor={theme.highlight}
+            placeholder="Nome"
           />
         )}
       />
@@ -123,7 +162,7 @@ const Form = () => {
       <Controller
         name="cep"
         control={control}
-        render={({field: {onChange, onBlur, value}}) => (
+        render={({ field: { onChange, onBlur, value } }) => (
           <MaskedTextInput
             style={styles.input}
             mask="99999-999"
@@ -131,6 +170,7 @@ const Form = () => {
             onChangeText={(text, rawText) => handleCepChange(rawText, onChange)}
             maxLength={9}
             placeholder="CEP"
+            placeholderTextColor={theme.highlight}
             onBlur={onBlur}
           />
         )}
@@ -140,13 +180,14 @@ const Form = () => {
       <Controller
         name="rua"
         control={control}
-        render={({field: {onChange, onBlur, value}}) => (
+        render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             style={styles.input}
             placeholder="Rua"
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
+            placeholderTextColor={theme.highlight}
             maxLength={40}
           />
         )}
@@ -156,13 +197,14 @@ const Form = () => {
       <Controller
         name="numero"
         control={control}
-        render={({field: {onChange, onBlur, value}}) => (
+        render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             style={styles.input}
             placeholder="Numero"
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
+            placeholderTextColor={theme.highlight}
             maxLength={40}
           />
         )}
@@ -172,13 +214,14 @@ const Form = () => {
       <Controller
         name="complemento"
         control={control}
-        render={({field: {onChange, onBlur, value}}) => (
+        render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             style={styles.input}
             placeholder="Complemento"
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
+            placeholderTextColor={theme.highlight}
             maxLength={40}
           />
         )}
@@ -187,13 +230,14 @@ const Form = () => {
       <Controller
         name="bairro"
         control={control}
-        render={({field: {onChange, onBlur, value}}) => (
+        render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             style={styles.input}
             placeholder="Bairro"
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
+            placeholderTextColor={theme.highlight}
             maxLength={40}
           />
         )}
@@ -203,13 +247,14 @@ const Form = () => {
       <Controller
         name="cidade"
         control={control}
-        render={({field: {onChange, onBlur, value}}) => (
+        render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             style={styles.input}
             placeholder="Cidade"
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
+            placeholderTextColor={theme.highlight}
             maxLength={40}
           />
         )}
@@ -219,13 +264,14 @@ const Form = () => {
       <Controller
         name="estado"
         control={control}
-        render={({field: {onChange, onBlur, value}}) => (
+        render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
             style={styles.input}
             placeholder="Estado"
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
+            placeholderTextColor={theme.highlight}
             maxLength={40}
           />
         )}
@@ -235,9 +281,14 @@ const Form = () => {
       <Controller
         name="file"
         control={control}
-        render={({field: {onChange, value}}) => (
-          <Button
-            title="Upload"
+        render={({ field: { onChange, value } }) => (
+          <Pressable
+            style={{
+              paddingVertical: 16,
+              backgroundColor: theme.highlight,
+              alignItems: 'center',
+              borderRadius: 8,
+            }}
             onPress={async () => {
               await PermissionsAndroid.request(
                 'android.permission.READ_EXTERNAL_STORAGE',
@@ -254,8 +305,11 @@ const Form = () => {
                 setValue('file', pickerResult);
                 setResult([pickerResult]);
               } catch (e) {}
-            }}
-          />
+            }}>
+            <Text style={{ color: theme.black }}>
+              {!result?.length ? 'Adicionar foto' : 'Foto Adicionada'}
+            </Text>
+          </Pressable>
         )}
       />
       <Text style={styles.errors}>{errors.file?.message}</Text>
@@ -278,5 +332,8 @@ const styles = StyleSheet.create({
     color: 'red',
     marginBottom: 16,
   },
-  input: {borderBottomWidth: 1},
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: theme.accent,
+  },
 });

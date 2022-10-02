@@ -6,45 +6,42 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as SCREEN from './src/screens';
-import { Provider } from 'react-redux';
-import { store } from './src/store';
 import { theme } from './src/theme';
+import { IForm } from './src/screens/form';
 
 export const navigationRef = createNavigationContainerRef<screenStack>();
 const Stack = createNativeStackNavigator();
 
 export type screenStack = {
   Home: undefined;
-  Form: undefined;
+  Form: IForm;
   List: undefined;
 };
 
 const App = () => {
   return (
-    <Provider store={store}>
-      <NavigationContainer ref={navigationRef}>
-        <Stack.Navigator
-          screenOptions={{
-            contentStyle: { backgroundColor: theme.background },
-          }}>
-          <Stack.Screen
-            name="Home"
-            component={SCREEN.Home}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="List"
-            component={SCREEN.List}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Form"
-            component={SCREEN.Form}
-            options={{ headerShown: false }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </Provider>
+    <NavigationContainer ref={navigationRef}>
+      <Stack.Navigator
+        screenOptions={{
+          contentStyle: { backgroundColor: theme.background },
+        }}>
+        <Stack.Screen
+          name="Home"
+          component={SCREEN.Home}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="List"
+          component={SCREEN.List}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Form"
+          component={SCREEN.Form}
+          options={{ headerShown: false }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
