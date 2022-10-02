@@ -6,7 +6,7 @@ import {
   ScrollView,
   TextInput,
   PermissionsAndroid,
-  Pressable,
+  Alert,
 } from 'react-native';
 import { MaskedTextInput } from 'react-native-mask-text';
 import { api, buscaCep } from '../../api';
@@ -47,6 +47,18 @@ const schema = yup.object().shape({
   file: yup.mixed().required('Campo obrigatório'),
 });
 
+const initialState = {
+  nome: '',
+  rua: '',
+  cep: '',
+  bairro: '',
+  numero: '',
+  complemento: '',
+  cidade: '',
+  estado: '',
+  file: '',
+};
+
 const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
   const [result, setResult] = useState<Array<DocumentPickerResponse>>();
   const [loading, setLoading] = useState<boolean>(false);
@@ -55,17 +67,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
     if (route?.params) {
       return route.params;
     }
-    return {
-      nome: '',
-      rua: '',
-      cep: '',
-      bairro: '',
-      numero: '',
-      complemento: '',
-      cidade: '',
-      estado: '',
-      file: '',
-    };
+    return initialState;
   };
 
   const {
@@ -76,6 +78,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
     reset,
   } = useForm<IForm>({
     defaultValues: initialValues(),
+    resolver: yupResolver(schema),
   });
 
   const onSubmit: SubmitHandler<IForm> = async (data: IForm) => {
@@ -107,24 +110,29 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             },
           },
         );
-      } else {
-        const oi = await api.post('/criar', dataAsFormData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        reset();
-        console.log(oi, 'oi');
+        return Alert.alert(
+          'Operação realizada com sucesso!',
+          'Usuário atualizado.',
+        );
       }
+      const oi = await api.post('/criar', dataAsFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log(oi, 'oi');
+      return Alert.alert(
+        'Operação realizada com sucesso!',
+        'Usuário cadastrado.',
+      );
     } catch (error) {
     } finally {
       setLoading(false);
+      reset(initialState);
     }
   };
 
-  const handleCepChange = async cep => {
-    //console.log(cep.split('').length);
-    //onChange?.();
+  const handleCepChange = async (cep: string) => {
     if (cep.split('').length === 8) {
       try {
         const { data } = await buscaCep.get(`${cep}/json`);
@@ -154,7 +162,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             onChangeText={onChange}
             onBlur={onBlur}
             maxLength={40}
-            placeholderTextColor={theme.highlight}
+            placeholderTextColor={theme.darkerHighlight}
             placeholder="Nome"
           />
         )}
@@ -172,7 +180,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             onChangeText={(text, rawText) => handleCepChange(rawText)}
             maxLength={9}
             placeholder="CEP"
-            placeholderTextColor={theme.highlight}
+            placeholderTextColor={theme.darkerHighlight}
             onBlur={onBlur}
           />
         )}
@@ -189,7 +197,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
-            placeholderTextColor={theme.highlight}
+            placeholderTextColor={theme.darkerHighlight}
             maxLength={40}
           />
         )}
@@ -206,7 +214,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
-            placeholderTextColor={theme.highlight}
+            placeholderTextColor={theme.darkerHighlight}
             maxLength={40}
           />
         )}
@@ -223,7 +231,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
-            placeholderTextColor={theme.highlight}
+            placeholderTextColor={theme.darkerHighlight}
             maxLength={40}
           />
         )}
@@ -240,7 +248,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
-            placeholderTextColor={theme.highlight}
+            placeholderTextColor={theme.darkerHighlight}
             maxLength={40}
           />
         )}
@@ -257,7 +265,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
-            placeholderTextColor={theme.highlight}
+            placeholderTextColor={theme.darkerHighlight}
             maxLength={40}
           />
         )}
@@ -274,7 +282,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             value={value}
             onChangeText={onChange}
             onBlur={onBlur}
-            placeholderTextColor={theme.highlight}
+            placeholderTextColor={theme.darkerHighlight}
             maxLength={40}
           />
         )}
@@ -299,8 +307,6 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
                   copyTo: 'cachesDirectory',
                   type: ['image/jpg', 'image/jpeg'],
                 });
-                console.log(pickerResult);
-                onChange?.();
                 setValue('file', pickerResult);
                 setResult([pickerResult]);
               } catch (e) {}
