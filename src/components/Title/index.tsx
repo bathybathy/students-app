@@ -13,7 +13,7 @@ const Title: React.FC<IProps> = ({ title = '' }) => {
 const styles = StyleSheet.create({
   title: {
     fontSize: 24,
-    color: theme.highlight,
+    color: theme.darkerHighlight,
     fontWeight: 'bold',
   },
 });

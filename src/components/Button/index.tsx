@@ -27,7 +27,7 @@ interface IProps {
 const fillThemes = {
   filled: {
     backgroundColor: theme.darkerHighlight,
-    borderColor: theme.highlight,
+    borderColor: theme.darkerHighlight,
     backgroundDisabled: theme.accent,
     textColor: theme.background,
   },

@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginVertical: 16,
     elevation: 5,
-    shadowColor: '#000',
+    shadowColor: theme.accent,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: 5,
