@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StatusBar, StyleSheet } from 'react-native';
 import {
   NavigationContainer,
   createNavigationContainerRef,
@@ -21,6 +21,7 @@ export type screenStack = {
 const App = () => {
   return (
     <NavigationContainer ref={navigationRef}>
+      <StatusBar barStyle={'dark-content'} />
       <Stack.Navigator
         screenOptions={{
           contentStyle: { backgroundColor: theme.background },
