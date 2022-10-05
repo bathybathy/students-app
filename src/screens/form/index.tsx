@@ -63,11 +63,22 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
   const [result, setResult] = useState<Array<DocumentPickerResponse>>();
   const [loading, setLoading] = useState<boolean>(false);
 
-  const initialValues = () => {
+  useEffect(() => {
+    checkInitialValues();
+  }, [route]);
+  console.log(route, 'route');
+  const checkInitialValues = () => {
     if (route?.params) {
-      return route.params;
+      console.log(route?.params, 'routinha');
+      setValue('cep', route?.params?.cep);
+      setValue('rua', route?.params?.rua);
+      setValue('bairro', route?.params?.bairro);
+      setValue('cidade', route?.params?.cidade);
+      setValue('estado', route?.params?.estado);
+      setValue('nome', route?.params?.nome);
+      setValue('numero', route?.params?.numero);
+      setValue('complemento', route?.params?.complemento);
     }
-    return initialState;
   };
 
   const {
@@ -77,12 +88,11 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
     formState: { errors },
     reset,
   } = useForm<IForm>({
-    defaultValues: initialValues(),
+    defaultValues: initialState,
     resolver: yupResolver(schema),
   });
 
   const onSubmit: SubmitHandler<IForm> = async (data: IForm) => {
-    console.log(data);
     setLoading(true);
     const dataAsFormData = new FormData();
 
@@ -101,26 +111,22 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
     }
     try {
       if (route.params) {
-        const oi = await api.patch(
-          `/update/${route.params._id}`,
-          dataAsFormData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
+        await api.patch(`/update/${route.params._id}`, dataAsFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
           },
-        );
+        });
         return Alert.alert(
           'Operação realizada com sucesso!',
           'Usuário atualizado.',
         );
       }
-      const oi = await api.post('/criar', dataAsFormData, {
+      await api.post('/criar', dataAsFormData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log(oi, 'oi');
+
       return Alert.alert(
         'Operação realizada com sucesso!',
         'Usuário cadastrado.',

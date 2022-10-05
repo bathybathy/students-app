@@ -7,4 +7,5 @@ export const theme = {
   marginHorizontal: 16,
   darkerBackground: '#fafafa',
   black: '#000',
+  tabHighlight: '#84CBF7',
 };

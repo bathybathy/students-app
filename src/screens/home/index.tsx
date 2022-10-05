@@ -9,20 +9,20 @@ import { theme } from '../../theme';
 const Home = () => {
   return (
     <Animated.View
-      entering={SlideInLeft.duration(400).easing(Easing.in(Easing.cubic))}
+      entering={SlideInLeft.duration(600).easing(Easing.in(Easing.cubic))}
       style={styles.container}>
       <Title title={'Cadastro de alunos'} />
       <Image source={require('../../assets/logo.png')} />
       <View style={{}}>
         <Button
           text="Formulário"
-          onPress={() => navigationRef.navigate('Form')}
+          onPress={() => navigationRef.navigate('Cadastro')}
           containerStyle={{ width: 250, marginVertical: 4 }}
         />
 
         <Button
           text="Lista de alunos"
-          onPress={() => navigationRef.navigate('List')}
+          onPress={() => navigationRef.navigate('Lista')}
           fill="outline"
           containerStyle={{ width: 250, marginVertical: 4 }}
         />

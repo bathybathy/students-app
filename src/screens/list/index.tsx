@@ -38,7 +38,8 @@ const List = () => {
   }, []);
 
   const handleEdit = item => {
-    navigationRef.navigate('Form', item);
+    console.log(item, 'item');
+    navigationRef.navigate({ name: 'Cadastro', params: item });
   };
 
   const handleDelete = async item => {
