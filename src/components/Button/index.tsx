@@ -7,9 +7,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import Animated, {
-  interpolate,
   interpolateColor,
-  useAnimatedSensor,
   useAnimatedStyle,
   useSharedValue,
   withTiming,

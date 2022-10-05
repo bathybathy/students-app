@@ -13,18 +13,18 @@ const Home = () => {
       style={styles.container}>
       <Title title={'Cadastro de alunos'} />
       <Image source={require('../../assets/logo.png')} />
-      <View style={{}}>
+      <View>
         <Button
           text="Formulário"
-          onPress={() => navigationRef.navigate('Cadastro')}
-          containerStyle={{ width: 250, marginVertical: 4 }}
+          onPress={() => navigationRef.navigate('Cadastro', {})}
+          containerStyle={styles.button}
         />
 
         <Button
           text="Lista de alunos"
           onPress={() => navigationRef.navigate('Lista')}
           fill="outline"
-          containerStyle={{ width: 250, marginVertical: 4 }}
+          containerStyle={styles.button}
         />
       </View>
     </Animated.View>
@@ -40,5 +40,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginHorizontal: theme.marginHorizontal,
     marginVertical: theme.marginVertical,
+  },
+  button: {
+    width: 250,
+    marginVertical: 4,
   },
 });

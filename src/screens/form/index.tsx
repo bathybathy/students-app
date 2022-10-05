@@ -12,10 +12,7 @@ import { MaskedTextInput } from 'react-native-mask-text';
 import { api, buscaCep } from '../../api';
 import * as yup from 'yup';
 import DocumentPicker, {
-  DirectoryPickerResponse,
   DocumentPickerResponse,
-  isInProgress,
-  types,
 } from 'react-native-document-picker';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -23,6 +20,7 @@ import { screenStack } from '../../../App';
 import { theme } from '../../theme';
 import Title from '../../components/Title';
 import Button from '../../components/Button';
+import { useFocusEffect } from '@react-navigation/native';
 
 export interface IForm {
   nome: string;
@@ -63,13 +61,14 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
   const [result, setResult] = useState<Array<DocumentPickerResponse>>();
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    checkInitialValues();
-  }, [route]);
-  console.log(route, 'route');
+  useFocusEffect(
+    React.useCallback(() => {
+      checkInitialValues();
+    }, [route]),
+  );
+
   const checkInitialValues = () => {
     if (route?.params) {
-      console.log(route?.params, 'routinha');
       setValue('cep', route?.params?.cep);
       setValue('rua', route?.params?.rua);
       setValue('bairro', route?.params?.bairro);
@@ -116,32 +115,29 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             'Content-Type': 'multipart/form-data',
           },
         });
-        return Alert.alert(
-          'Operação realizada com sucesso!',
-          'Usuário atualizado.',
-        );
-      }
-      await api.post('/criar', dataAsFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+        Alert.alert('Operação realizada com sucesso!', 'Usuário atualizado.');
+      } else {
+        await api.post('/criar', dataAsFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
 
-      return Alert.alert(
-        'Operação realizada com sucesso!',
-        'Usuário cadastrado.',
-      );
+        Alert.alert('Operação realizada com sucesso!', 'Usuário cadastrado.');
+      }
+      setResult([]);
+      reset(initialState);
     } catch (error) {
+      Alert.alert('Houve um erro!', 'Por favor, tente novamente.');
     } finally {
       setLoading(false);
-      reset(initialState);
     }
   };
 
-  const handleCepChange = async (cep: string) => {
-    if (cep.split('').length === 8) {
+  const handleCepChange = async (cep: string, rawCep: string) => {
+    if (rawCep.split('').length === 8) {
       try {
-        const { data } = await buscaCep.get(`${cep}/json`);
+        const { data } = await buscaCep.get(`${rawCep}/json`);
         if (data) {
           setValue('cep', cep);
           setValue('rua', data.logradouro);
@@ -183,7 +179,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
             style={styles.input}
             mask="99999-999"
             value={value}
-            onChangeText={(text, rawText) => handleCepChange(rawText)}
+            onChangeText={(text, rawText) => handleCepChange(text, rawText)}
             maxLength={9}
             placeholder="CEP"
             placeholderTextColor={theme.darkerHighlight}
@@ -298,7 +294,7 @@ const Form = ({ route }: NativeStackScreenProps<screenStack>) => {
       <Controller
         name="file"
         control={control}
-        render={({ field: { onChange, value } }) => (
+        render={({ field }) => (
           <Button
             fill="outline"
             text={!result?.length ? 'Adicionar foto' : 'Foto Adicionada'}
@@ -342,7 +338,7 @@ const styles = StyleSheet.create({
   },
   errors: {
     fontSize: 11,
-    color: 'red',
+    color: theme.error,
     marginBottom: 16,
   },
   input: {

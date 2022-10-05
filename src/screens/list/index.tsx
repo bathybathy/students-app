@@ -1,48 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  Image,
-  StyleSheet,
-  Pressable,
-  Alert,
-} from 'react-native';
-import { navigationRef } from '../../../App';
+import React, { useState } from 'react';
+import { View, Text, FlatList, Image, StyleSheet, Alert } from 'react-native';
+import { navigationRef, screenStack } from '../../../App';
 import { api } from '../../api';
 import Title from '../../components/Title';
 import Button from '../../components/Button';
 import { theme } from '../../theme';
-import Animated, { SlideInLeft } from 'react-native-reanimated';
+import Animated, { Easing, SlideInLeft } from 'react-native-reanimated';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
+import Loading from '../../components/Loading';
 
-interface IItem {
+export interface Item {
   nome: string;
   rua: string;
   url: string;
+  numero: string;
+  complemento: string;
+  cep: string;
+  bairro: string;
+  _id: string;
+}
+interface IItem {
+  item: Item;
 }
 
-const List = () => {
-  const [list, setList] = useState<Array<IItem>>([]);
+const List = ({ route }: NativeStackScreenProps<screenStack>) => {
+  const [list, setList] = useState<Array<Item>>([]);
   const getList = async () => {
     try {
       const { data } = await api.get('/');
       setList(data);
+      return data;
     } catch (error) {
       console.log(error);
     }
   };
 
-  console.log(list);
-  useEffect(() => {
-    getList();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      getList();
+    }, []),
+  );
 
-  const handleEdit = item => {
-    console.log(item, 'item');
+  const handleEdit = (item: Item) => {
     navigationRef.navigate({ name: 'Cadastro', params: item });
   };
 
-  const handleDelete = async item => {
+  const handleDelete = async (item: Item) => {
     try {
       await api.delete(`/delete/${item._id}`);
       Alert.alert(
@@ -53,43 +57,38 @@ const List = () => {
   };
 
   const renderItem = ({ item }: IItem) => {
-    console.log(item);
-
     //prettier-ignore
     return (
-      <Animated.View entering={SlideInLeft} style={styles.card}>
-        {item.url ? (<Image style={{width: 50, height: 50, borderRadius: 25, padding: 8}} source={{uri: `${item.url}`}} /> ): (<React.Fragment />)}
-        <View style={{flexDirection: 'column'}}>
+      <Animated.View entering={SlideInLeft.easing(Easing.in(Easing.cubic))} style={styles.card}>
+        {item?.url ? (<Image style={styles.image} source={{uri: `${item.url}`}} /> ): (<React.Fragment />)}
+        <View style={styles.column}>
         
         <View style={styles.row}>
-        <Text style={{ fontSize: 16}}>Nome: </Text><Text style={styles.name}>{item.nome}</Text>
+        <Text style={styles.label}>Nome: </Text><Text style={styles.name}>{item?.nome}</Text>
         </View>
         
         <View style={styles.row}>
-        <Text style={{ fontSize: 16}}>Rua: </Text><Text style={styles.name}>{item.rua}</Text>
+        <Text style={styles.name}>{item?.rua}, {item?.numero}</Text>
         </View>
         
+        {item?.complemento?( 
         <View style={styles.row}>
-        <Text style={{ fontSize: 16}}>Numero: </Text><Text style={styles.name}>{item.numero}</Text>
-        </View>
-        
-        {item.complemento?( 
-        <View style={styles.row}>
-        <Text style={{ fontSize: 16}}>Complemento: </Text><Text style={styles.name}>{item.complemento}</Text>
+        <Text style={styles.label}>Complemento: </Text><Text style={styles.name}>{item?.complemento}</Text>
         </View>) 
         : (<React.Fragment />)}
         <View style={styles.row}>
-        <Text style={{ fontSize: 16}}>CEP: </Text><Text style={styles.name}>{item.cep}</Text>
+        <Text style={styles.label}>CEP: </Text><Text style={styles.name}>{item?.cep}</Text>
         
         </View>
-        </View>
+        
 
         <View style={styles.column}>
         <View style={styles.row}>
-        <Button onPress={()=>handleEdit(item)} text='Editar' fill='filled' containerStyle={{width: 100,}} />
+        <Button onPress={()=>handleEdit(item)} text='Editar' fill='filled' containerStyle={styles.button} />
         </View>
         <View style={styles.row}>
-        <Button onPress={()=>handleDelete(item)} text='Deletar' fill='outline' containerStyle={{marginVertical: 4, width: 100,}} />
+        <Button onPress={()=>handleDelete(item)} text='Deletar' fill='outline' containerStyle={styles.button} />
+        </View>
         </View>
         </View>
       </Animated.View>
@@ -98,13 +97,17 @@ const List = () => {
   return (
     <View style={styles.container}>
       <Title title="Alunos Cadastrados" />
-      <FlatList
-        data={list}
-        renderItem={renderItem}
-        ListEmptyComponent={<React.Fragment />}
-        extraData={list}
-        refreshing={!list.length}
-      />
+      {list.length ? (
+        <FlatList
+          data={list}
+          renderItem={renderItem}
+          ListEmptyComponent={<React.Fragment />}
+          extraData={list}
+          refreshing={!list.length}
+        />
+      ) : (
+        <Loading />
+      )}
     </View>
   );
 };
@@ -133,10 +136,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
+    flexWrap: 'wrap',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    padding: 8,
+  },
+  label: {
+    fontSize: 16,
   },
   name: {
     color: theme.accent,
     fontSize: 16,
+    flexWrap: 'wrap',
   },
   row: {
     flexDirection: 'row',
@@ -144,5 +158,9 @@ const styles = StyleSheet.create({
   },
   column: {
     flexDirection: 'column',
+  },
+  button: {
+    marginVertical: 4,
+    width: 200,
   },
 });

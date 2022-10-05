@@ -8,4 +8,5 @@ export const theme = {
   darkerBackground: '#fafafa',
   black: '#000',
   tabHighlight: '#84CBF7',
+  error: '#FF0000',
 };
