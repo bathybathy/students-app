@@ -4,4 +4,4 @@ Esse projeto foi realizado com React Native. O objetivo foi consumir um backend 
 
 Exemplos de libs utilizadas no projeto são react-native-reanimated e react-navigation, libs essenciais no quadro atual de React Native.
 
-Para rodar o projeto, depois de clonar, é necessário utilizar o comando "yarn" da raiz do projeto e, depois de concluído, o comando yarn run android.
+Para rodar o projeto, depois de clonar, é necessário utilizar o comando "yarn" da raiz do projeto e, depois de concluído, o comando yarn run android. Como o backend está disponível no heroku, não há necessidade de buildá-lo manualmente.
